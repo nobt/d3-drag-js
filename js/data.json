@@ -1,0 +1,166 @@
+{
+	"nodes": [
+		{
+			"name": "Internet",
+			"type": "0",
+			"status":"0"
+		},{
+			"name": "交换机",
+			"type": "1",
+			"status":"1",
+			"info":{
+				"netstatus":"网络良好 "
+			}
+		},{
+			"name": "路由器",
+			"type": "2",
+			"status":"1",
+			"info":{
+				"netstatus":"网络良好 "
+			}
+		},{
+			"name": "路由器",
+			"type": "2",
+			"status":"1",
+			"info":{
+				"netstatus":"网络良好 "
+			}
+		},{
+			"name": "路由器",
+			"type": "2",
+			"status":"1",
+			"info":{
+				"netstatus":"网络良好 "
+			}
+		},{
+			"name": "交换机",
+			"type": "1",
+			"status":"1",
+			"info":{
+				"netstatus":"网络良好 "
+			}
+		},{
+			"name": "路由器",
+			"type": "2",
+			"status":"1",
+			"info":{
+				"netstatus":"网络良好 "
+			}
+		},{
+			"name": "路由器",
+			"type": "2",
+			"status":"1",
+			"info":{
+				"netstatus":"网络良好 "
+			}
+		},{
+			"name": "路由器",
+			"type": "2",
+			"status":"1",
+			"info":{
+				"netstatus":"网络良好 "
+			}
+		},{
+			"name": "交换机",
+			"type": "1",
+			"status":"1",
+			"info":{
+				"netstatus":"网络良好 "
+			}
+		},{
+			"name": "路由器",
+			"type": "2",
+			"status":"1",
+			"info":{
+				"netstatus":"网络良好 "
+			}
+		},{
+			"name": "路由器",
+			"type": "2",
+			"status":"1",
+			"info":{
+				"netstatus":"网络良好 "
+			}
+		},{
+			"name": "路由器",
+			"type": "2",
+			"status":"1",
+			"info":{
+				"netstatus":"网络良好 "
+			}
+		}
+	],
+	"lines": [{
+			"source": 0,
+			"target": 1,
+			"active": true,
+			"status":0,
+			"netspeed":"10B/s"
+		}, {
+			"source": 0,
+			"target": 5,
+			"active": true,
+			"status":1,
+			"netspeed":"11B/s"
+		},{
+			"source": 0,
+			"target": 9,
+			"active": true,
+			"status":1,
+			"netspeed":"14B/s"
+		},{
+			"source": 1,
+			"target": 2,
+			"active": true,
+			"status":1,
+			"netspeed":"17B/s"
+		},{
+			"source": 1,
+			"target": 3,
+			"active": true,
+			"status":1,
+			"netspeed":"22B/s"
+		},{
+			"source": 1,
+			"target": 4,
+			"active": true,
+			"status":1,
+			"netspeed":"55B/s"
+		},{
+			"source": 5,
+			"target": 6,
+			"active": true,
+			"status":1,
+			"netspeed":"77B/s"
+		},{
+			"source": 5,
+			"target": 7,
+			"active": true,
+			"status":1,
+			"netspeed":"88B/s"
+		},{
+			"source": 5,
+			"target": 8,
+			"active": true,
+			"status":1,
+			"netspeed":"43B/s"
+		},{
+			"source": 9,
+			"target": 10,
+			"active": true,
+			"status":1,
+			"netspeed":"19B/s"
+		},{
+			"source": 9,
+			"target": 11,
+			"active": true,
+			"status":1,
+			"netspeed":"99B/s"
+		},{
+			"source": 9,
+			"target": 12,
+			"active": true,
+			"status":1,
+			"netspeed":"87B/s"
+		}]
+}

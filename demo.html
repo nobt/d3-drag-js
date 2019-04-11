@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>D3 test</title>
+</head>
+<body>
+<div id="tpContainer" style="overflow: hidden;"></div>
+</body>
+
+</html>
+<script src ="js/d3.v3.min.js"></script>
+<script type="text/javascript" src="js/jquery-1.11.0.min.js" ></script>
+<script>
+/*
+* 全局坐标
+*/
+var dataNodes;
+/**
+* 初始化图片
+*/
+var imgMap = {
+	'0':'img/net.png',
+	'1':'img/switch.png',
+	'2':'img/modem.png',
+	'error-tip':'img/tip.png',
+	'link-cut':'img/cut.png'
+};
+/**
+* 配置
+*/
+var option = {
+	container:'#tpContainer',
+	data:'js/data.json',
+	width:window.innerWidth || document.documentElement.clientWidth,
+	height:window.innerHeight || document.documentElement.innerHeight
+};
+/**
+* 初始化构造函数
+*/
+var TpChart = function (option){
+	var _defaultOption = {
+		width:300,
+		height:300,
+		data:'',
+		container:''
+	};
+
+	option = $.extend(true, _defaultOption,option);
+	this.width  = option.width;
+	this.height = option.height;
+	this.data   = option.data;//数据url或对象,必填
+	this.container = option.container;//svg容器(node或者选择器)，必填
+}
+/**
+* init 方法
+*/
+TpChart.prototype.init = function(){
+	
+	var _this = this;
+	d3.json(_this.data,function(error,data){
+		if(error) throw error ;
+		_this.data = data;
+		_this.render(_this.data.nodes,_this.data.lines);
+	});
+
+}
+/**
+* 预定义的原型对象: render
+*/
+TpChart.prototype.render = function(nodes,lines){
+		dataNodes  = nodes;
+		var _this = this;
+		var width = _this.width;
+		var height = _this.height;
+		var svg = d3.select(_this.container).append("svg")
+			.attr("width",width)
+			.attr("height",height)
+			.style("pointer-events", "all");
+		var graph = svg.append("g").attr("class","graph");
+		//添加缩放行为
+		svg.call(getZoomBehavior(graph));
+		//线条 g标签
+		var _g_lines = graph.selectAll("g.line").data(lines)
+			.enter()
+			.append("g")
+			.attr("class","line");
+			// line标签
+			_g_lines.append("line").style('stroke',function(d){
+				if(d.status == 0){
+					return '#f76e5d';
+				}else{
+					return '#93c62d';
+				}
+			}).style("stroke-width",2);
+			//线条遍历 判断线条是否正常
+			_g_lines.each(function(d,i){
+				var _this = d3.select(this);
+				if(d.netspeed && d.status != 0){
+				    //正常添加流动效果
+					_this.append("text")
+						.text(d.netspeed)
+						.style('fill','rgb(255,198,22)')
+						.style('font-size','11');
+					//正常添加流动效果	
+					_this.append("rect").attr("fill",function(d){
+						return '#555';
+					}).attr("width",function(d){
+						return 2;
+					}).attr("height",function(d){
+						return 2;
+					}).append("animate");
+					_this.select("rect").append("animate");
+				}else{
+				    //不正常添加断开图片
+					_this.append("image").attr("xlink:href",function(){
+						return imgMap['link-cut'];
+					}).attr("width", 16).attr("height", 29);;
+				}
+			});
+		//节点
+		var _g_nodes = graph.selectAll("g.node").data(nodes)
+			.enter()
+			.append("g")
+			.attr("class","node");
+			
+			//添加image标签加载图片
+			_g_nodes.append("image").style("width",function(d){
+				var width = compued(d) + 'px';
+				return width;
+			}).style("height",function(d){
+				var height = compued(d) + 'px';
+				return height;
+			}).attr("xlink:href",function(d){
+				return imgMap[d.type];
+			}).attr("width",function(d){
+				return compued(d);
+			}).attr("height",function(d){
+				return compued(d);
+			});
+			//添加text标签
+			_g_nodes.append("text").text(function(d){
+				return d.name;
+			}).style('font-size','12').style('fill','#333');
+			//节点遍历 判断节点是否正常，不正常添加标签		
+			_g_nodes.each(function(d,i){
+				var selection = d3.select(this);
+				if(d.status == '0'){
+					selection.append("g").attr("class","error-tip").append("image").attr("xlink:href",function(d){
+						return imgMap['error-tip'];
+					}).attr("width", 16).attr("height", 16);
+				}
+			});
+		//力向图
+		var force = d3.layout.force()
+			.nodes(nodes)
+			.links(lines)
+			.size([width, height])
+			.linkDistance(function(d){
+				var distance = 90;
+				distance += distance*Math.random()*0.5;
+				return distance;
+			})
+			.charge(-700)
+			.start();
+
+		//拖动开始	
+		var drag = force.drag().on("dragstart", dragstart);	
+
+		force.on("tick", function() {
+			//线条-位置
+			_g_lines.select("line").attr("x1",function(d){
+				   return d.source.x;
+				}).attr("y1",function(d){
+				   return d.source.y;
+				}).attr("x2",function(d){
+				   return d.target.x;
+				}) .attr("y2",function(d){
+				   return d.target.y;
+				});
+			//线条-图片位置		
+			_g_lines.select("image").attr("x",function(d){
+				var x1 = d.source.x,
+					x2 = d.target.x,
+					x  = x1-(x1-x2)/2;
+					//线段二分之一处
+					return x - 8;
+			}).attr("y",function(d){
+				var y1 = d.source.y,
+					y2 = d.target.y,
+					y  = y1-(y1-y2)/2;
+				//线段二分之一处
+				return y - 15;
+			});
+			//线条-文字			
+			_g_lines.select("text").attr('x',function(d){
+				var x1 = d.source.x,
+					x2 = d.target.x,
+					halfX  = x1-(x1-x2)/2,
+					x3 = x1-(x1-halfX)/2;  
+				//线段3分之-处
+				return x3;
+				//return d.source.x-(d.source.x-d.target.x)/2;
+			}).attr('y',function(d){ 
+				var y1 = d.source.y,
+					y2 = d.target.y,
+					halfY = y1-(y1-y2)/2,
+					y3 = y1-(y1-halfY)/2;
+				
+				//使文本与线段之间有一定间隙
+				y3 = y3 - 5;
+				return y3;
+				//return y1-(y1-y2)/2;
+			}).attr("transform",function(d){
+				var x1 = d.source.x,
+					x2 = d.target.x,
+					y1 = d.source.y,
+					y2 = d.target.y,
+					x  = x1-(x1-x2)/2,
+					y  = y1-(y1-y2)/2,
+					rightAngleSide1 = Math.abs(y2-y1),
+					rightAngleSide2 = Math.abs(x2-x1),
+					_asin = 0,
+					_rotateAngle = 0,
+					x3 = x1-(x1-x)/2 ,
+					y3 = y1-(y1-y)/2;
+					
+					if(x1 < x2){
+						_asin = (y2-y1)/Math.sqrt(Math.pow(rightAngleSide1,2)+Math.pow(rightAngleSide2,2));
+						_rotateAngle = Math.asin(_asin)*180/Math.PI;
+					}else{
+						_asin = (y1-y2)/Math.sqrt(Math.pow(rightAngleSide1,2)+Math.pow(rightAngleSide2,2));
+						_rotateAngle = Math.asin(_asin)*180/Math.PI;
+						_rotateAngle = _rotateAngle < 0?(180+_rotateAngle):-(180-_rotateAngle);
+					}
+				return 'rotate('+(_rotateAngle)+','+x3+' '+y3+')';//以线段的三分之一出为旋转焦点
+				//return 'rotate('+(_rotateAngle)+','+x+' '+y+')';//以线段的二分之一处为旋转焦点
+			});
+			//线条-动画效果
+			_g_lines.select("rect").attr('x',function(d){
+				return d.source.x-1;
+			}).attr('y',function(d){
+				return d.source.y-1;
+			}).selectAll('animate').each(function(d,i){
+				if(i == 0){
+					d3.select(this).attr("attributeName",function(d){
+						return 'x';
+					}).attr("from",function(d){
+						return d.source.x-1;
+					}).attr("to",function(d){
+						return d.target.x;
+					});
+				}else{
+					d3.select(this).attr("attributeName",function(d){
+						return 'y';
+					}).attr("from",function(d){
+						return d.source.y-1;
+					}).attr("to",function(d){
+						return d.target.y;
+					});
+				}
+				
+				d3.select(this).attr("attributeType","XML").attr("dur",function(d){
+					return '1.5s';
+				}).attr("repeatCount","indefinite");
+			});
+			//节点-位置
+			_g_nodes.attr("transform",function(d){
+				
+				var image = d3.select(this).select("image")[0][0],
+					halfWidth = parseFloat(image.style.width)/2,
+					halfHeight = parseFloat(image.style.height)/2;
+					
+				return 'translate('+(d.x-halfWidth)+','+(d.y-halfHeight)+')';
+				
+			});
+			//节点-文字
+			_g_nodes.select("text").attr('dy',function(d){
+				var image = this.previousSibling,
+					height = parseFloat(image.style.height),
+					fontSize = parseFloat(this.style.fontSize);
+					
+				return height+1.5*fontSize;
+			});
+			//节点-不正常处理
+			_g_nodes.select(".error-tip").attr("transform",function(d){	
+				var image = this.parentNode.firstChild,width = parseFloat(image.style.width);	
+				return 'translate('+0.8*width+',0)';
+				
+			})
+			//节点的拖拽
+			_g_nodes.call(drag);
+			
+		});
+		
+
+}
+/**
+* 缩放行为方法
+*/
+function getZoomBehavior(g){
+	return d3.behavior.zoom().scaleExtent([0.5,10]).on("zoom",zoomEvtFn);
+	function zoomEvtFn(){
+		g.attr("transform","translate("+d3.event.translate+")scale(" + d3.event.scale + ")");
+	}
+}
+/**
+* 节点固定
+*/
+function dragstart(d) {
+  d3.event.sourceEvent.stopPropagation();	
+  d3.select(this).classed("fixed", d.fixed = true);
+  console.log('节点固定');
+}
+/**
+* 计算图片宽高
+*/
+function compued(d){
+	var flag = 40;
+	switch (d.type){
+		case '0':
+			flag = 1.5*flag;
+			break;
+		case '1':
+			flag = 1.2*flag;
+			break;
+		default:
+			flag;
+	}
+	return  flag;	
+}
+
+var tp = new TpChart(option);
+tp.init();
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
