@@ -6,7 +6,7 @@
 3. 可以修改当前图片
 # 扩展
 *在TpGraph.min.js提供了点击事件、以及初始化每个节点的位置
-··· javascript
+···javascript
 	/**
 	* 化图片
 	*/
