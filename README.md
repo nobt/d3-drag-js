@@ -5,7 +5,7 @@
 2. 可以缩放
 3. 可以修改当前图片
 # 扩展
-*在TpGraph.min.js提供了点击事件、以及初始化每个节点的位置
+1. 在TpGraph.min.js提供了点击事件、以及初始化每个节点的位置
 ```javascript
 	/**
 	* 化图片
@@ -42,15 +42,15 @@
 	//初始化
 	TpGraph.init(option, imgMap);
 ```
-*在TpGraph.min.js提供getNodesCoordinate()方法获取每个节点的全部数据，也可以获取每个节点指定的数据\<br>
-		获取全部数据
-		```javascript
-		TpGraph.getNodesCoordinate()
-		```
-		获取指定参数的值，此时只能传数组
-		```javascript
-		TpGraph.getNodesCoordinate(['x','y']);
-		```	
+2. 在TpGraph.min.js提供getNodesCoordinate()方法获取每个节点的全部数据，也可以获取每个节点指定的数据
+获取全部数据
+```javascript
+TpGraph.getNodesCoordinate()
+```
+获取指定参数的值，此时只能传数组
+```javascript
+TpGraph.getNodesCoordinate(['x','y']);
+```	
 		
 	
 	
