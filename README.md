@@ -22,7 +22,8 @@ var imgMap = {
 */
 var option = {
 	container:'#tpContainer',
-	data:'js/data.json',
+	data:'js/data.json',// 请求的数据url，与dataList 取其一即可
+	dataList: '', // {nodes: [], lines: [] } 
 	width:window.innerWidth || document.documentElement.clientWidth,
 	height:window.innerHeight || document.documentElement.innerHeight,
 	classedfixed: false,//默认节点没有初始化坐标
@@ -37,7 +38,10 @@ var option = {
 	},
 	mouseleave: function(obj, d){
 	  //鼠标离开节点code
-	}	
+	},
+	dragclickevent: function(){
+	  //拖拽之后的单击事件
+	}
 };
 //初始化
 TpGraph.init(option, imgMap);
